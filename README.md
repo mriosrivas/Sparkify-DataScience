@@ -22,8 +22,6 @@ To see a deployed dashboard for the Sparkify-DataScience project, please visit [
 
 The code for the dashboard can be found in the [GitHub - mriosrivas/Sparkify-Dashboard: Sparkify&#39;s dashboard and prediction service](https://github.com/mriosrivas/Sparkify-Dashboard) repository.
 
-
-
 ## Project Analysis
 
 ### High-level overview
@@ -37,8 +35,6 @@ include loading large datasets into Spark, manipulating them using Spark  SQL an
 There are two datasets available for use in this project. The first dataset, called `sparkify_event_data.json`, is a large dataset that contains a significant amount of data, with a file size of 12.8 gigabytes (GB). The second dataset, `mini_sparkify_event_data.json`, is a smaller version of the same dataset and has a file size of 128.5 megabytes (MB).
 
 To work with the larger dataset, the project suggests using the AWS EMR (Elastic MapReduce) platform. AWS EMR is a managed Hadoop framework that makes it easy to process large amounts of data using open-source tools like Apache Spark, Apache Hadoop, and Apache Hive. By leveraging the scalability of AWS EMR, data scientists can process and analyze large amounts of data without having to worry about managing the underlying infrastructure.
-
-
 
 ## Strategy for solving the problem
 
@@ -54,8 +50,6 @@ The following describes the strategy for solving the given problem:
 
 5. Select the best model upon best metrics: Once all three models have been cross-validated and their AUC values have been calculated, the model with the best performance should be selected as the final model. This model can then be used to predict churn rates and identify which customers are most likely to leave.
 
-
-
 ### Discussion of the expected solution
 
 The goal of this project is to develop a model that can predict customer churn based on a set of features from the dataset. This means that the model should be able to analyze the customer data and determine which customers are most likely to leave the service.
@@ -63,6 +57,14 @@ The goal of this project is to develop a model that can predict customer churn b
 To accomplish this, the project will involve cleaning and processing the data, selecting relevant features, and training and evaluating several machine learning models to identify the best one. The end result will be a model that can be used to predict churn and help businesses retain their customers.
 
 In addition to the churn prediction model, the project will also create a dashboard with aggregated data to enhance the user experience. By presenting information in a visually appealing and easy-to-use format, the dashboard will enable users to quickly and easily access the insights they need to make data-driven decisions and take action to reduce churn.
+
+### Metrics with justification
+
+The project involved the development of three machine learning algorithms: logistic regression, random forest, and naive Bayes classifier. The development process of the models included the use of auxiliary methods in Spark for logistic regression and random forest, enabling easy metric results retrieval, such as the ROC curve. However, for the naive Bayes classifier, a separate class named `CurveMetrics.py` was developed to obtain and plot the ROC values. The AUC metric was selected to evaluate the performance of the models as it is a strong metric for binary classifiers, unlike accuracy or precision.
+
+During the coding process, it was observed that the naive Bayes classifier underfitted on the training data, which was expected due to the model's simplicity. In contrast, while performing hyperparameter tuning for the random forest classifier, some models obtained through the process overfitted on the training data due to the use of a high number of trees and depth.
+
+Overall, the project involved the development of three models, each with its specific implementation challenges and considerations. The use of appropriate evaluation metrics and hyperparameter tuning allowed for the selection of the best model for the problem at hand. 
 
 ### EDA
 
@@ -76,13 +78,54 @@ The first step in our EDA is to identify and remove any outliers from the data. 
 
 After removing the outliers, we can select the features that are most relevant to our analysis. We will use Kendall's Tau correlation coefficient to identify the features that are most strongly correlated with the label variable. Kendall's Tau is a non-parametric measure of correlation that is useful when dealing with ordinal data or when the relationship between variables is not linear.
 
+The following table shows the result of the Kendall's Tau correlation results:
+
+| Feature             | Correlation |
+| ------------------- | ----------- |
+| userId              | -0.011431   |
+| gender              | -0.011527   |
+| n_pages             | 0.340224    |
+| thumbs_down         | 0.343723    |
+| home                | 0.355459    |
+| downgrade           | 0.373419    |
+| roll_advert         | 0.325310    |
+| cancellation        | -0.000778   |
+| about               | 0.296137    |
+| submit_registration | NaN         |
+| cancel              | -0.000778   |
+| login               | NaN         |
+| register            | NaN         |
+| add_playlist        | 0.328948    |
+| nextsong            | 0.336290    |
+| thumbs_up           | 0.312806    |
+| error               | 0.275452    |
+| submit_upgrade      | 0.495729    |
+| total_length        | 0.336051    |
+
+With the obtained results, the following features for the machine learning model were considered:
+
+- `n_pages`
+- `thumbs_down`
+- `home`
+- `downgrade`
+- `roll_advert`
+- `about`
+- `add_playlist`
+- `nextsong`
+- `thumbs_up`
+- `error`
+- `submit_upgrade`
+- `total_length`
+
 #### Step 3: Plot Selected Features
 
-Finally, we will plot the selected features to further investigate their relationship with the label variable. Plotting the data can help us identify any patterns or trends that may exist within the data and can provide insights into the relationship between the features and the label variable. Storing Cleaned Data
+Finally, we will plot the selected features to further investigate their relationship with the label variable. Plotting the data can help us identify any patterns or trends that may exist within the data and can provide insights into the relationship between the features and the label variable. 
+
+The following plot shows the selected features and the relationship between the `label` variable. It can be seen from the different plots that as the feature increases in value there is a tendency for the customer to churn. It is interesting, because we can try to find when is that the user that uses the platform makes the decision to churn based on the longevity in the platform.
+
+![Analysis of Features](images/EDA.png)
 
 For more detail on the EDA you can take a look at the [ETL notebook](ETL.ipynb).
-
-
 
 ### Data Preprocessing
 
@@ -118,8 +161,6 @@ Finally, we will store the data as a single CSV file in the `features/` folder.
 
 More detailed information can be obtained in the [ETL.ipynb](ETL.ipynb) notebook.
 
-
-
 ### Modeling
 
 The following is the procedure for modeling our classifiers:
@@ -146,8 +187,6 @@ After comparing the ROC curves, the confusion matrix is calculated for each mode
 
 More detailed information can be obtained in the [ML.ipynb](ML.ipynb) notebook.
 
-
-
 ### Hyperparameter Tuning
 
 For hyperparameter tuning we perform the following:
@@ -170,8 +209,6 @@ More detailed information can be obtained in the [ML-Pipeline.ipynb](ML-Pipeline
 
 The best model for the churn prediction was the random forest classifier. In this case the model with `numTrees = 10` and `maxDepth = 10` performed best.
 
-
-
 ### Comparison Table
 
 |     | precision | recall   | f1-score | model               |
@@ -187,8 +224,6 @@ After training and cross-validating three different machine learning models - lo
 This finding is important because it provides a clear recommendation for which model to use for predicting churn in this particular dataset. By selecting the random forest classifier, businesses can be confident that they are using a model that is likely to generate accurate predictions and help them retain their customers.
 
 Additionally, the fact that the analysis was performed using Spark is significant because it demonstrates the power of this platform for handling and analyzing large amounts of data. The size of the dataset used in this project - 12.8 GB - is well beyond the capacity of many traditional data analysis tools, such as Excel or even R or Python. By leveraging Spark, it was possible to process and analyze this dataset in a scalable and efficient manner. This is a valuable capability for businesses that need to analyze large volumes of data, as it allows them to generate insights that might otherwise be inaccessible.
-
-
 
 ## Improvement
 
